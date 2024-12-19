@@ -9,7 +9,6 @@ import * as THREE from "three"
 import JOLT from "@/util/loading/JoltSyncLoader"
 import { BodyAssociate, LayerReserve } from "@/systems/physics/PhysicsSystem"
 import Mechanism from "@/systems/physics/Mechanism"
-import InputSystem from "@/systems/input/InputSystem"
 import { EjectorPreferences, FieldPreferences, IntakePreferences } from "@/systems/preferences/PreferenceTypes"
 import PreferencesSystem from "@/systems/preferences/PreferencesSystem"
 import { MiraType } from "./MirabufLoader"
@@ -32,6 +31,8 @@ import {
     ConfigurationType,
     setSelectedConfigurationType,
 } from "@/ui/panels/configuring/assembly-config/ConfigurationType"
+import { SimConfigData } from "@/ui/panels/simulation/SimConfigShared"
+import WPILibBrain from "@/systems/simulation/wpilib_brain/WPILibBrain"
 
 const DEBUG_BODIES = false
 
@@ -68,6 +69,7 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
 
     private _intakePreferences: IntakePreferences | undefined
     private _ejectorPreferences: EjectorPreferences | undefined
+    private _simConfigData: SimConfigData | undefined
 
     private _fieldPreferences: FieldPreferences | undefined
 
@@ -76,6 +78,22 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
     private _scoringZones: ScoringZoneSceneObject[] = []
 
     private _nameTag: SceneOverlayTag | undefined
+
+    private _intakeActive = false
+    private _ejectorActive = false
+
+    public get intakeActive() {
+        return this._intakeActive
+    }
+    public get ejectorActive() {
+        return this._ejectorActive
+    }
+    public set intakeActive(a: boolean) {
+        this._intakeActive = a
+    }
+    public set ejectorActive(a: boolean) {
+        this._ejectorActive = a
+    }
 
     get mirabufInstance() {
         return this._mirabufInstance
@@ -95,6 +113,10 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
 
     get ejectorPreferences() {
         return this._ejectorPreferences
+    }
+
+    get simConfigData() {
+        return this._simConfigData
     }
 
     get fieldPreferences() {
@@ -117,6 +139,12 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
         return this._brain
     }
 
+    public set brain(brain: Brain | undefined) {
+        this._brain = brain
+        const simLayer = World.SimulationSystem.GetSimulationLayer(this._mechanism)!
+        simLayer.SetBrain(brain)
+    }
+
     public constructor(mirabufInstance: MirabufInstance, assemblyName: string, progressHandle?: ProgressHandle) {
         super()
 
@@ -137,7 +165,11 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
         // creating nametag for robots
         if (this.miraType === MiraType.ROBOT) {
             this._nameTag = new SceneOverlayTag(() =>
-                this._brain instanceof SynthesisBrain ? this._brain.inputSchemeName : "Not Configured"
+                this._brain instanceof SynthesisBrain
+                    ? this._brain.inputSchemeName
+                    : this._brain instanceof WPILibBrain
+                      ? "Magic"
+                      : "Not Configured"
             )
         }
     }
@@ -177,7 +209,7 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
         if (this.miraType == MiraType.ROBOT) {
             World.SimulationSystem.RegisterMechanism(this._mechanism)
             const simLayer = World.SimulationSystem.GetSimulationLayer(this._mechanism)!
-            this._brain = new SynthesisBrain(this._mechanism, this._assemblyName)
+            this._brain = new SynthesisBrain(this, this._assemblyName)
             simLayer.SetBrain(this._brain)
         }
 
@@ -212,13 +244,11 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
     }
 
     public Update(): void {
-        const brainIndex = this._brain instanceof SynthesisBrain ? this._brain.brainIndex ?? -1 : -1
-        if (InputSystem.getInput("eject", brainIndex)) {
+        if (this.ejectorActive) {
             this.Eject()
         }
 
         this.UpdateMeshTransforms()
-
         this.UpdateBatches()
         this.UpdateNameTag()
     }
@@ -456,10 +486,24 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
     }
 
     private getPreferences(): void {
-        this._intakePreferences = PreferencesSystem.getRobotPreferences(this.assemblyName)?.intake
-        this._ejectorPreferences = PreferencesSystem.getRobotPreferences(this.assemblyName)?.ejector
+        const robotPrefs = PreferencesSystem.getRobotPreferences(this.assemblyName)
+        if (robotPrefs) {
+            this._intakePreferences = robotPrefs.intake
+            this._ejectorPreferences = robotPrefs.ejector
+            this._simConfigData = robotPrefs.simConfig
+        }
 
         this._fieldPreferences = PreferencesSystem.getFieldPreferences(this.assemblyName)
+    }
+
+    public UpdateSimConfig(config: SimConfigData | undefined) {
+        const robotPrefs = PreferencesSystem.getRobotPreferences(this.assemblyName)
+        if (robotPrefs) {
+            this._simConfigData = robotPrefs.simConfig = config
+            PreferencesSystem.setRobotPreferences(this.assemblyName, robotPrefs)
+            PreferencesSystem.savePreferences()
+            ;(this._brain as WPILibBrain)?.loadSimConfig?.()
+        }
     }
 
     public EnablePhysics() {
@@ -488,31 +532,42 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
     public getSupplierData(): ContextData {
         const data: ContextData = { title: this.miraType == MiraType.ROBOT ? "A Robot" : "A Field", items: [] }
 
-        data.items.push({
-            name: "Move",
-            func: () => {
-                setSelectedConfigurationType(
-                    this.miraType == MiraType.ROBOT ? ConfigurationType.ROBOT : ConfigurationType.FIELD
-                )
-                setNextConfigurePanelSettings({
-                    configMode: ConfigMode.MOVE,
-                    selectedAssembly: this,
-                })
-                Global_OpenPanel?.("configure")
+        data.items.push(
+            {
+                name: "Move",
+                func: () => {
+                    setSelectedConfigurationType(
+                        this.miraType == MiraType.ROBOT ? ConfigurationType.ROBOT : ConfigurationType.FIELD
+                    )
+                    setNextConfigurePanelSettings({
+                        configMode: ConfigMode.MOVE,
+                        selectedAssembly: this,
+                    })
+                    Global_OpenPanel?.("configure")
+                },
             },
-        })
-
-        if (this.miraType == MiraType.ROBOT) {
-            const brainIndex = (this.brain as SynthesisBrain)?.brainIndex
-            if (brainIndex != undefined) {
-                data.items.push({
-                    name: "Set Scheme",
-                    func: () => {
-                        setSpotlightAssembly(this)
-                        Global_OpenPanel?.("choose-scheme")
-                    },
-                })
+            {
+                name: "Configure",
+                func: () => {
+                    setSelectedConfigurationType(
+                        this.miraType == MiraType.ROBOT ? ConfigurationType.ROBOT : ConfigurationType.FIELD
+                    )
+                    setNextConfigurePanelSettings({
+                        configMode: undefined,
+                        selectedAssembly: this,
+                    })
+                    Global_OpenPanel?.("configure")
+                },
             }
+        )
+
+        if (this.brain?.brainType == "wpilib") {
+            data.items.push({
+                name: "Auto Testing",
+                func: () => {
+                    Global_OpenPanel?.("auto-test")
+                },
+            })
         }
 
         if (World.SceneRenderer.currentCameraControls.controlsType == "Orbit") {
