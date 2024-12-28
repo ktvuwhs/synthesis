@@ -34,7 +34,7 @@ import {
 import { SimConfigData } from "@/ui/panels/simulation/SimConfigShared"
 import WPILibBrain from "@/systems/simulation/wpilib_brain/WPILibBrain"
 
-const DEBUG_BODIES = false
+const DEBUG_BODIES = true
 
 interface RnDebugMeshes {
     colliderMesh: THREE.Mesh
@@ -154,9 +154,7 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
         progressHandle?.Update("Creating mechanism...", 0.9)
 
         this._mechanism = World.PhysicsSystem.CreateMechanismFromParser(this._mirabufInstance.parser)
-        if (this._mechanism.layerReserve) {
-            this._physicsLayerReserve = this._mechanism.layerReserve
-        }
+        if (this._mechanism.layerReserve) this._physicsLayerReserve = this._mechanism.layerReserve
 
         this._debugBodies = null
 
@@ -291,9 +289,7 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
     }
 
     public Eject() {
-        if (!this._ejectable) {
-            return
-        }
+        if (!this._ejectable) return
 
         this._ejectable.Eject()
         World.SceneRenderer.RemoveSceneObject(this._ejectable.id)
@@ -412,9 +408,7 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
 
     public SetEjectable(bodyId?: Jolt.BodyID, removeExisting: boolean = false): boolean {
         if (this._ejectable) {
-            if (!removeExisting) {
-                return false
-            }
+            if (!removeExisting) return false
 
             World.SceneRenderer.RemoveSceneObject(this._ejectable.id)
             this._ejectable = undefined

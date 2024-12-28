@@ -70,6 +70,7 @@ class ExporterOptions:
                 attrJsonData = makeObjectFromJson(type(field.type), json.loads(attribute.value))
                 setattr(self, field.name, attrJsonData)
 
+        self.visualQuality = TriangleMeshQualityOptions.LowQualityTriangleMesh
         return self
 
     @logFailure
