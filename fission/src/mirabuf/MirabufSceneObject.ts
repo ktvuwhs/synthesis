@@ -34,7 +34,7 @@ import {
 import { SimConfigData } from "@/ui/panels/simulation/SimConfigShared"
 import WPILibBrain from "@/systems/simulation/wpilib_brain/WPILibBrain"
 
-const DEBUG_BODIES = true
+const DEBUG_BODIES = false
 
 interface RnDebugMeshes {
     colliderMesh: THREE.Mesh
@@ -504,12 +504,14 @@ class MirabufSceneObject extends SceneObject implements ContextSupplier {
         this._mirabufInstance.parser.rigidNodes.forEach(rn => {
             World.PhysicsSystem.EnablePhysicsForBody(this._mechanism.GetBodyByNodeId(rn.id)!)
         })
+        this._mechanism.ghostBodies.forEach(x => World.PhysicsSystem.EnablePhysicsForBody(x))
     }
 
     public DisablePhysics() {
         this._mirabufInstance.parser.rigidNodes.forEach(rn => {
             World.PhysicsSystem.DisablePhysicsForBody(this._mechanism.GetBodyByNodeId(rn.id)!)
         })
+        this._mechanism.ghostBodies.forEach(x => World.PhysicsSystem.DisablePhysicsForBody(x))
     }
 
     public GetRootNodeId(): Jolt.BodyID | undefined {

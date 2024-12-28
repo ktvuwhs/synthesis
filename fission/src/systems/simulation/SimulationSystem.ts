@@ -91,20 +91,20 @@ class SimulationLayer {
         this._drivers = new Map()
         this._stimuli = new Map()
         this._mechanism.constraints.forEach(x => {
-            if (x.constraint.GetSubType() == JOLT.EConstraintSubType_Hinge) {
-                const hinge = JOLT.castObject(x.constraint, JOLT.HingeConstraint)
+            if (x.primaryConstraint.GetSubType() == JOLT.EConstraintSubType_Hinge) {
+                const hinge = JOLT.castObject(x.primaryConstraint, JOLT.HingeConstraint)
                 const driver = new HingeDriver(makeDriverID(x), hinge, x.maxVelocity, x.info)
                 this._drivers.set(JSON.stringify(driver.id), driver)
                 const stim = new HingeStimulus(makeStimulusID(x), hinge, x.info)
                 this._stimuli.set(JSON.stringify(stim.id), stim)
-            } else if (x.constraint.GetSubType() == JOLT.EConstraintSubType_Vehicle) {
-                const vehicle = JOLT.castObject(x.constraint, JOLT.VehicleConstraint)
+            } else if (x.primaryConstraint.GetSubType() == JOLT.EConstraintSubType_Vehicle) {
+                const vehicle = JOLT.castObject(x.primaryConstraint, JOLT.VehicleConstraint)
                 const driver = new WheelDriver(makeDriverID(x), vehicle, x.maxVelocity, x.info)
                 this._drivers.set(JSON.stringify(driver.id), driver)
                 const stim = new WheelRotationStimulus(makeStimulusID(x), vehicle.GetWheel(0), x.info)
                 this._stimuli.set(JSON.stringify(stim.id), stim)
-            } else if (x.constraint.GetSubType() == JOLT.EConstraintSubType_Slider) {
-                const slider = JOLT.castObject(x.constraint, JOLT.SliderConstraint)
+            } else if (x.primaryConstraint.GetSubType() == JOLT.EConstraintSubType_Slider) {
+                const slider = JOLT.castObject(x.primaryConstraint, JOLT.SliderConstraint)
                 const driver = new SliderDriver(makeDriverID(x), slider, x.maxVelocity, x.info)
                 this._drivers.set(JSON.stringify(driver.id), driver)
                 const stim = new SliderStimulus(makeStimulusID(x), slider, x.info)
