@@ -37,9 +37,9 @@ repositories {
     }
 }
 
-def WPI_Version = '2024.3.2'
-def REV_Version = '2024.2.4'
-def CTRE_Version = '24.3.0'
+def WPI_Version = '2025.1.1'
+def REV_Version = '2025.0.0'
+def CTRE_Version = '25.1.0'
 def KAUAI_Version = '2024.1.0'
 
 dependencies {

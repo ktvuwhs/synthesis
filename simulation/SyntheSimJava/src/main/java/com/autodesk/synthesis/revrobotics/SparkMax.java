@@ -4,17 +4,19 @@ import java.util.ArrayList;
 
 import com.autodesk.synthesis.CANEncoder;
 import com.autodesk.synthesis.CANMotor;
-import com.revrobotics.CANSparkBase;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.REVLibError;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 /**
  * CANSparkMax wrapper to add proper WPILib HALSim support.
  */
-public class CANSparkMax extends com.revrobotics.CANSparkMax {
+public class SparkMax extends com.revrobotics.spark.SparkMax {
 
     private CANMotor m_motor;
     public CANEncoder m_encoder;
-    private ArrayList<CANSparkMax> followers;
+    private ArrayList<SparkMax> followers;
 
     /**
      * Creates a new CANSparkMax, wrapped with simulation support.
@@ -25,12 +27,12 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax {
      *
      * See original documentation for more information https://codedocs.revrobotics.com/java/com/revrobotics/cansparkmax
      */
-    public CANSparkMax(int deviceId, MotorType motorType) {
+    public SparkMax(int deviceId, com.revrobotics.spark.SparkLowLevel.MotorType motorType) {
         super(deviceId, motorType);
 
         this.m_motor = new CANMotor("SYN CANSparkMax", deviceId, 0.0, false, 0.3);
         this.m_encoder = new CANEncoder("SYN CANSparkMax", deviceId);
-        this.followers = new ArrayList<CANSparkMax>();
+        this.followers = new ArrayList<SparkMax>();
     }
 
     /**
@@ -45,7 +47,7 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax {
     public void set(double percent) {
         super.set(percent);
         this.m_motor.setPercentOutput(percent);
-        for (CANSparkMax follower : this.followers) {
+        for (SparkMax follower : this.followers) {
             follower.set(percent);
         }
     }
@@ -63,15 +65,14 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax {
      * Sets the real and simulated motors to an idle mode
      *
      * @param mode The specific idle mode (Brake, Coast)
-     *
-     * @return A library error indicating failure or success
      */
-    @Override
-    public REVLibError setIdleMode(com.revrobotics.CANSparkBase.IdleMode mode) {
-        if (mode != null)
-            this.m_motor.setBrakeMode(mode.equals(com.revrobotics.CANSparkBase.IdleMode.kBrake));
-
-        return super.setIdleMode(mode);
+    public void setIdleMode(com.revrobotics.spark.config.SparkBaseConfig.IdleMode mode) {
+        if (mode != null) {
+            SparkMaxConfig config = new SparkMaxConfig();
+            config.idleMode(mode);
+            super.configure(config, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, com.revrobotics.spark.SparkBase.PersistMode.kPersistParameters);
+            // this.m_motor.setBrakeMode(mode.equals(com.revrobotics.CANSparkBase.IdleMode.kBrake));
+        }
     }
 
     /** 
@@ -94,7 +95,7 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax {
      *
      * @param f The new follower
      */
-    void newFollower(CANSparkMax f) {
+    void newFollower(SparkMax f) {
         this.followers.add(f);
     }
 
@@ -103,15 +104,10 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax {
      * The real versions of these motors will also follow each other.
      *
      * @param leader The motor for this robot to follow
-     *
-     * @return A library error indicating failure or success
      */
-    @Override
-    public REVLibError follow(CANSparkBase leader) {
-        REVLibError err = super.follow(leader);
-        if (leader instanceof CANSparkMax) {
-            ((CANSparkMax) leader).newFollower(this);
+    public void follow(com.revrobotics.spark.SparkBase leader) {
+        if (leader instanceof SparkMax) {
+            ((SparkMax) leader).newFollower(this);
         }
-        return err;
     }
 }
