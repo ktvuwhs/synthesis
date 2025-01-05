@@ -5,7 +5,7 @@ import com.autodesk.synthesis.CANMotor;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.hardware.DeviceIdentifier
+import com.ctre.phoenix6.hardware.DeviceIdentifier;
 
 public class TalonFX extends com.ctre.phoenix6.hardware.TalonFX {
     private CANMotor m_motor;
