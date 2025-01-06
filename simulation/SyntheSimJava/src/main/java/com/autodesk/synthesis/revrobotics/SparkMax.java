@@ -87,7 +87,7 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
     }
 
     public com.autodesk.synthesis.revrobotics.RelativeEncoder getEncoderSim() {
-        return new RelativeEncoder(super.getEncoder(), this.m_encoder);
+        return new RelativeEncoder(this);
     }
 
     /**
