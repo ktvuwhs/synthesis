@@ -7,6 +7,7 @@ import com.autodesk.synthesis.CANMotor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 /**
@@ -52,6 +53,15 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
         }
     }
 
+    @Override
+    public REVLibError configure(SparkBaseConfig config, SparkBase.ResetMode resetMode, SparkBase.PersistMode persistMode) {
+        super.configure(config, resetMode, persistMode);
+        m_encoder.setPositionConversionFactor(super.configAccessor.encoder.getPositionConversionFactor());
+        m_encoder.setVelocityConversionFactor(super.configAccessor.encoder.getVelocityConversionFactor());
+        m_encoder.setInverted(super.configAccessor.encoder.getInverted());
+        return REVLibError.kOk;
+    }
+
     /**
      * Sets the neutralDeadband of the real and simulated motors
      *
@@ -87,7 +97,7 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
     }
 
     public com.autodesk.synthesis.revrobotics.RelativeEncoder getEncoderSim() {
-        return new RelativeEncoder(this);
+        return new RelativeEncoder(this.m_encoder);
     }
 
     /**
