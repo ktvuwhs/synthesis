@@ -18,6 +18,9 @@ public class CANEncoder {
     private SimBoolean m_init;
     private SimDouble m_position;
     private SimDouble m_velocity;
+    private SimDouble m_positionConversionFactor;
+    private SimDouble m_velocityConversionFactor;
+    private SimDouble m_invertedFactor;
 
     /**
      * Creates an Encoder accessed by the CANBus.
@@ -31,6 +34,9 @@ public class CANEncoder {
         m_init = m_device.createBoolean("init", Direction.kOutput, true);
         m_position = m_device.createDouble("position", Direction.kInput, 0.0);
         m_velocity = m_device.createDouble("velocity", Direction.kInput, 0.0);
+        m_positionConversionFactor = m_device.createDouble("position conversion factor", Direction.kInput, 1.0);
+        m_velocityConversionFactor = m_device.createDouble("velocity conversion factor", Direction.kInput, 1.0);
+        m_invertedFactor = m_device.createDouble("isInverted", Direction.kInput, 1.0);
 
         m_init.set(true);
     }
@@ -41,7 +47,7 @@ public class CANEncoder {
      * @return Current position in revolutions.
      */
     public double getPosition() {
-        return m_position.get();
+        return m_position.get() * m_positionConversionFactor.get() * m_invertedFactor.get();
     }
 
     /**
@@ -50,6 +56,48 @@ public class CANEncoder {
      * @return Current velocity in revolutions per second.
      */
     public double getVelocity() {
-        return m_velocity.get();
+        return m_velocity.get() * m_velocityConversionFactor.get() * m_invertedFactor.get();
+    }
+
+    /**
+     * Sets the current position of the encoder, simulated.
+     * This returns the native units of 'rotations' by default,
+     * and can be changed by a scale factor using setPositionConversionFactor().
+     * 
+     * @param   pos Current position.
+     */
+    // public void setPosition(double pos) {
+    //     if (pos == 0.0) {
+    //         m_position.reset();
+    //     } else {
+    //         m_position.set(pos);
+    //     }
+    // }
+
+    /**
+     * Sets the position conversion factor of the encoder, simulated.
+     * 
+     * @param factor    The factor to multiply the position by
+     */
+    public void setPositionConversionFactor(double factor) {
+        m_positionConversionFactor.set(factor);
+    }
+
+    /**
+     * Sets the position conversion factor of the encoder, simulated.
+     * 
+     * @param factor    The factor to multiply the velocity by
+     */
+    public void setVelocityConversionFactor(double factor) {
+        m_velocityConversionFactor.set(factor);
+    }
+
+    /**
+     * Sets the position conversion factor of the encoder, simulated.
+     * 
+     * @param isInverted    Whether the encoder is inverted or not
+     */
+    public void setInverted(boolean isInverted) {
+        m_invertedFactor.set(isInverted ? -1.0 : 1.0);
     }
 }
