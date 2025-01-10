@@ -1,8 +1,8 @@
 package com.autodesk.synthesis.revrobotics;
 
 import com.autodesk.synthesis.CANEncoder;
-import com.revrobotics.REVLibError;
 import com.revrobotics.spark.config.SparkMaxConfigAccessor;
+import com.revrobotics.REVLibError;
 
 public class RelativeEncoder implements com.revrobotics.RelativeEncoder {
 
