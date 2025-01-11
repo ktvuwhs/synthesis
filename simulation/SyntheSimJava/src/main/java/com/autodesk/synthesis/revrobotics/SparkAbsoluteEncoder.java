@@ -3,7 +3,6 @@ package com.autodesk.synthesis.revrobotics;
 import com.autodesk.synthesis.CANEncoder;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.REVLibError;
 
 /**
  * SparkAbsoluteEncoder wrapper to add proper WPILib HALSim support.

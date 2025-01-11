@@ -7,10 +7,9 @@ package frc.robot;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.autodesk.synthesis.io.*;
 import com.autodesk.synthesis.revrobotics.spark.SparkMax;
-import com.autodesk.synthesis.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.SPI;
 
@@ -73,8 +72,6 @@ public class Robot extends TimedRobot {
         configPrimary.encoder.positionConversionFactor(0.01);
         SparkMaxConfig configSecondary = new SparkMaxConfig();
         configSecondary.follow(1);
-
-        // configPrimary.encoder
 
         m_SparkMax1.configure(configPrimary, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_SparkMax2.configure(configSecondary, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
