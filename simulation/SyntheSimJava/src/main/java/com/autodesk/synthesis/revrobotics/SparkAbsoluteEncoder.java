@@ -3,6 +3,7 @@ package com.autodesk.synthesis.revrobotics;
 import com.autodesk.synthesis.CANEncoder;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.spark.config.AbsoluteEncoderConfigAccessor;
 
 /**
  * SparkAbsoluteEncoder wrapper to add proper WPILib HALSim support.
@@ -10,32 +11,25 @@ import com.revrobotics.AbsoluteEncoder;
 public class SparkAbsoluteEncoder implements AbsoluteEncoder {
     private CANEncoder simEncoder;
     private com.revrobotics.spark.SparkAbsoluteEncoder realEncoder;
+    private AbsoluteEncoderConfigAccessor m_accessor;
 
     /*
      * A SparkAbsoluteEncoder class that returns the motors position and velocity from the simulated motor in fission, rather than the actual motor.
      * All other parameters are returned from the real motor, which likely won't exist, not sure what it does then but we'll just call it UB.
      */
-    public SparkAbsoluteEncoder(com.revrobotics.spark.SparkAbsoluteEncoder realEncoder, CANEncoder simEncoder) {
+    public SparkAbsoluteEncoder(com.revrobotics.spark.SparkAbsoluteEncoder realEncoder, CANEncoder simEncoder, AbsoluteEncoderConfigAccessor accessor) {
         this.realEncoder = realEncoder;
         this.simEncoder = simEncoder;
+        m_accessor = accessor;
     }
 
-    /**
-     * Gets the position of the simulated motor.
-     * This returns the native units of 'rotations' by default, and can be changed by a scale factor using setPositionConversionFactor().
-     *
-     * @return Number of rotations of the motor
-     */
+    @Override
     public double getPosition() {
-        return this.simEncoder.getPosition();
+        return simEncoder.getPosition() * m_accessor.getPositionConversionFactor() * (m_accessor.getInverted() ? -1.0 : 1.0) - m_accessor.getZeroOffset();
     }
 
-    /**
-     * Gets the velocity of the simulated motor. This returns the native units of 'rotations per second' by default, and can be changed by a scale factor using setVelocityConversionFactor().
-     *
-     * @return Number of rotations per second of the motor
-     */
+    @Override
     public double getVelocity() {
-        return this.simEncoder.getVelocity();
+        return simEncoder.getVelocity() * m_accessor.getVelocityConversionFactor() * (m_accessor.getInverted() ? -1.0 : 1.0);
     }
 }
