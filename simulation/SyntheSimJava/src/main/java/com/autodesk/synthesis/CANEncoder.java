@@ -18,9 +18,6 @@ public class CANEncoder {
     private SimBoolean m_init;
     private SimDouble m_position;
     private SimDouble m_velocity;
-    private SimDouble m_positionConversionFactor;
-    private SimDouble m_velocityConversionFactor;
-    private SimDouble m_invertedFactor;
 
     /**
      * Creates an Encoder accessed by the CANBus.
