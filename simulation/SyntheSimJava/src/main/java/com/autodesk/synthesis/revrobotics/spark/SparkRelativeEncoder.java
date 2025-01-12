@@ -1,17 +1,18 @@
-package com.autodesk.synthesis.revrobotics;
+package com.autodesk.synthesis.revrobotics.spark;
 
 import com.autodesk.synthesis.CANEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.EncoderConfigAccessor;
 import com.revrobotics.REVLibError;
 
-public class RelativeEncoder implements com.revrobotics.RelativeEncoder {
+public class SparkRelativeEncoder implements RelativeEncoder {
 
     private com.revrobotics.RelativeEncoder m_original;
     private double m_zero = 0.0;
     private CANEncoder m_encoder;
     private EncoderConfigAccessor m_accessor;
     
-    public RelativeEncoder(com.revrobotics.RelativeEncoder original, CANEncoder encoder, EncoderConfigAccessor accessor) {
+    public SparkRelativeEncoder(com.revrobotics.RelativeEncoder original, CANEncoder encoder, EncoderConfigAccessor accessor) {
         m_original = original;
         m_encoder = encoder;
         m_accessor = accessor;

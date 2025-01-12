@@ -5,8 +5,6 @@ import java.util.HashSet;
 
 import com.autodesk.synthesis.CANEncoder;
 import com.autodesk.synthesis.CANMotor;
-import com.autodesk.synthesis.revrobotics.RelativeEncoder;
-import com.autodesk.synthesis.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -103,12 +101,12 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
      * 
      * @return The simulation-supported SparkAbsoluteEncoder.
      */
-    public com.autodesk.synthesis.revrobotics.SparkAbsoluteEncoder getAbsoluteEncoderSim() {
-        return new SparkAbsoluteEncoder(super.getAbsoluteEncoder(), this.m_encoder, this.configAccessor.absoluteEncoder);
+    public com.autodesk.synthesis.revrobotics.spark.SparkAbsoluteEncoder getAbsoluteEncoderSim() {
+        return new com.autodesk.synthesis.revrobotics.spark.SparkAbsoluteEncoder(super.getAbsoluteEncoder(), this.m_encoder, this.configAccessor.absoluteEncoder);
     }
 
-    public com.autodesk.synthesis.revrobotics.RelativeEncoder getEncoderSim() {
-        return new RelativeEncoder(super.getEncoder(), this.m_encoder, this.configAccessor.encoder);
+    public com.autodesk.synthesis.revrobotics.spark.SparkRelativeEncoder getEncoderSim() {
+        return new com.autodesk.synthesis.revrobotics.spark.SparkRelativeEncoder(super.getEncoder(), this.m_encoder, this.configAccessor.encoder);
     }
 
     public class FollowerInfo {
