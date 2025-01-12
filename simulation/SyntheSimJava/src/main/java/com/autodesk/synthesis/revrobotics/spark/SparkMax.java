@@ -104,11 +104,11 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
      * @return The simulation-supported SparkAbsoluteEncoder.
      */
     public com.autodesk.synthesis.revrobotics.SparkAbsoluteEncoder getAbsoluteEncoderSim() {
-        return new SparkAbsoluteEncoder(super.getAbsoluteEncoder(), this.m_encoder);
+        return new SparkAbsoluteEncoder(super.getAbsoluteEncoder(), this.m_encoder, this.configAccessor.absoluteEncoder);
     }
 
     public com.autodesk.synthesis.revrobotics.RelativeEncoder getEncoderSim() {
-        return new RelativeEncoder(super.getEncoder(), this.m_encoder, this.configAccessor);
+        return new RelativeEncoder(super.getEncoder(), this.m_encoder, this.configAccessor.encoder);
     }
 
     public class FollowerInfo {
