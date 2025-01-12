@@ -1,4 +1,4 @@
-package com.autodesk.synthesis.revrobotics;
+package com.autodesk.synthesis.revrobotics.spark;
 
 import com.autodesk.synthesis.CANEncoder;
 
