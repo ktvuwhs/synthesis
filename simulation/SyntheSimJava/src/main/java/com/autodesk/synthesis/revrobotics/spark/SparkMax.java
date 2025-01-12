@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import com.autodesk.synthesis.CANEncoder;
 import com.autodesk.synthesis.CANMotor;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -105,7 +106,7 @@ public class SparkMax extends com.revrobotics.spark.SparkMax {
         return new com.autodesk.synthesis.revrobotics.spark.SparkAbsoluteEncoder(super.getAbsoluteEncoder(), this.m_encoder, this.configAccessor.absoluteEncoder);
     }
 
-    public com.autodesk.synthesis.revrobotics.spark.SparkRelativeEncoder getEncoderSim() {
+    public RelativeEncoder getEncoderSim() {
         return new com.autodesk.synthesis.revrobotics.spark.SparkRelativeEncoder(super.getEncoder(), this.m_encoder, this.configAccessor.encoder);
     }
 
